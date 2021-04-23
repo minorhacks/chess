@@ -234,7 +234,7 @@ impl ChessMove {
             _ => None,
         };
 
-        let takes = if let Some("x") = move_text.get(cur_index..(cur_index + 1)) {
+        let _takes = if let Some("x") = move_text.get(cur_index..(cur_index + 1)) {
             cur_index += 1;
             true
         } else {
@@ -288,6 +288,7 @@ impl ChessMove {
             None
         };
 
+        #[allow(unused_assignments)]
         if let Some(s) = move_text.get(cur_index..(cur_index + 1)) {
             let _maybe_check_or_mate = match s {
                 "+" => {
@@ -301,16 +302,6 @@ impl ChessMove {
                 _ => None,
             };
         }
-
-        let ep = if let Some(s) = move_text.get(cur_index..) {
-            s == " e.p."
-        } else {
-            false
-        };
-
-        //if ep {
-        //    cur_index += 5;
-        //}
 
         // Ok, now we have all the data from the SAN move, in the following structures
         // moveing_piece, source_rank, source_file, taks, dest, promotion, maybe_check_or_mate, and
@@ -345,15 +336,6 @@ impl ChessMove {
 
             if found_move.is_some() {
                 return Err(error);
-            }
-
-            // takes is complicated, because of e.p.
-            if !takes && board.piece_on(m.get_dest()).is_some() {
-                continue;
-            }
-
-            if !ep && takes && board.piece_on(m.get_dest()).is_none() {
-                continue;
             }
 
             found_move = Some(m);
