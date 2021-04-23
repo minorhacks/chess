@@ -22,7 +22,7 @@ impl SquareAndBitBoard {
         SquareAndBitBoard {
             square: sq,
             bitboard: bb,
-            promotion: promotion,
+            promotion,
         }
     }
 }
@@ -47,10 +47,10 @@ pub type MoveList = NoDrop<ArrayVec<[SquareAndBitBoard; 18]>>;
 /// # Examples
 ///
 /// ```
-/// use chess::MoveGen;
-/// use chess::Board;
-/// use chess::EMPTY;
-/// use chess::construct;
+/// use minorhacks_chess::MoveGen;
+/// use minorhacks_chess::Board;
+/// use minorhacks_chess::EMPTY;
+/// use minorhacks_chess::construct;
 ///
 /// // create a board with the initial position
 /// let board = Board::default();
@@ -169,9 +169,7 @@ impl MoveGen {
         // that in i.  Then, increment i to point to a new unused slot.
         for j in (i + 1)..self.moves.len() {
             if self.moves[j].bitboard & self.iterator_mask != EMPTY {
-                let backup = self.moves[i];
-                self.moves[i] = self.moves[j];
-                self.moves[j] = backup;
+                self.moves.swap(i, j);
                 i += 1;
             }
         }

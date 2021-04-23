@@ -35,16 +35,16 @@ fn rook_directions() -> Vec<fn(Square) -> Option<Square>> {
 // Return a list of directions for the bishop.
 fn bishop_directions() -> Vec<fn(Square) -> Option<Square>> {
     fn nw(sq: Square) -> Option<Square> {
-        sq.left().map_or(None, |s| s.up())
+        sq.left().and_then(|s| s.up())
     }
     fn ne(sq: Square) -> Option<Square> {
-        sq.right().map_or(None, |s| s.up())
+        sq.right().and_then(|s| s.up())
     }
     fn sw(sq: Square) -> Option<Square> {
-        sq.left().map_or(None, |s| s.down())
+        sq.left().and_then(|s| s.down())
     }
     fn se(sq: Square) -> Option<Square> {
-        sq.right().map_or(None, |s| s.down())
+        sq.right().and_then(|s| s.down())
     }
 
     vec![nw, ne, sw, se]

@@ -39,11 +39,17 @@ pub struct Game {
     moves: Vec<Action>,
 }
 
+impl Default for Game {
+    fn default() -> Self {
+        Game::new()
+    }
+}
+
 impl Game {
     /// Create a new `Game` with the initial position.
     ///
     /// ```
-    /// use chess::{Game, Board};
+    /// use minorhacks_chess::{Game, Board};
     ///
     /// let game = Game::new();
     /// assert_eq!(game.current_position(), Board::default());
@@ -58,7 +64,7 @@ impl Game {
     /// Create a new `Game` with a specific starting position.
     ///
     /// ```
-    /// use chess::{Game, Board};
+    /// use minorhacks_chess::{Game, Board};
     ///
     /// let game = Game::new_with_board(Board::default());
     /// assert_eq!(game.current_position(), Board::default());
@@ -73,7 +79,7 @@ impl Game {
     /// Get all actions made in this game (moves, draw offers, resignations, etc.)
     ///
     /// ```
-    /// use chess::{Game, MoveGen, Color};
+    /// use minorhacks_chess::{Game, MoveGen, Color};
     ///
     /// let mut game = Game::new();
     /// let mut movegen = MoveGen::new_legal(&game.current_position());
@@ -89,7 +95,7 @@ impl Game {
     /// What is the status of this game?
     ///
     /// ```
-    /// use chess::Game;
+    /// use minorhacks_chess::Game;
     ///
     /// let game = Game::new();
     /// assert!(game.result().is_none());
@@ -105,7 +111,7 @@ impl Game {
             }
             BoardStatus::Stalemate => Some(GameResult::Stalemate),
             BoardStatus::Ongoing => {
-                if self.moves.len() == 0 {
+                if self.moves.is_empty() {
                     None
                 } else if self.moves[self.moves.len() - 1] == Action::AcceptDraw {
                     Some(GameResult::DrawAccepted)
@@ -125,7 +131,7 @@ impl Game {
     /// Create a new `Game` object from an FEN string.
     ///
     /// ```
-    /// use chess::{Game, Board};
+    /// use minorhacks_chess::{Game, Board};
     ///
     /// // This is the better way:
     /// # {
@@ -150,7 +156,7 @@ impl Game {
     /// Get the current position on the board from the `Game` object.
     ///
     /// ```
-    /// use chess::{Game, Board};
+    /// use minorhacks_chess::{Game, Board};
     ///
     /// let game = Game::new();
     /// assert_eq!(game.current_position(), Board::default());
@@ -159,11 +165,8 @@ impl Game {
         let mut copy = self.start_pos;
 
         for x in self.moves.iter() {
-            match *x {
-                Action::MakeMove(m) => {
-                    copy = copy.make_move_new(m);
-                }
-                _ => {}
+            if let Action::MakeMove(m) = *x {
+                copy = copy.make_move_new(m);
             }
         }
 
@@ -173,7 +176,7 @@ impl Game {
     /// Determine if a player can legally declare a draw by 3-fold repetition or 50-move rule.
     ///
     /// ```
-    /// use chess::{Game, Square, ChessMove};
+    /// use minorhacks_chess::{Game, Square, ChessMove};
     ///
     /// let b1c3 = ChessMove::new(Square::B1, Square::C3, None);
     /// let c3b1 = ChessMove::new(Square::C3, Square::B1, None);
@@ -211,31 +214,26 @@ impl Game {
         // and filling a list of legal_moves_per_turn list for 3-fold repitition
         legal_moves_per_turn.push((board.get_hash(), MoveGen::new_legal(&board).collect()));
         for x in self.moves.iter() {
-            match *x {
-                Action::MakeMove(m) => {
-                    let white_castle_rights = board.castle_rights(Color::White);
-                    let black_castle_rights = board.castle_rights(Color::Black);
-                    if board.piece_on(m.get_source()) == Some(Piece::Pawn) {
-                        reversible_moves = 0;
-                        legal_moves_per_turn.clear();
-                    } else if board.piece_on(m.get_dest()).is_some() {
-                        reversible_moves = 0;
-                        legal_moves_per_turn.clear();
-                    } else {
-                        reversible_moves += 1;
-                    }
-                    board = board.make_move_new(m);
-
-                    if board.castle_rights(Color::White) != white_castle_rights
-                        || board.castle_rights(Color::Black) != black_castle_rights
-                    {
-                        reversible_moves = 0;
-                        legal_moves_per_turn.clear();
-                    }
-                    legal_moves_per_turn
-                        .push((board.get_hash(), MoveGen::new_legal(&board).collect()));
+            if let Action::MakeMove(m) = *x {
+                let white_castle_rights = board.castle_rights(Color::White);
+                let black_castle_rights = board.castle_rights(Color::Black);
+                if board.piece_on(m.get_source()) == Some(Piece::Pawn)
+                    || board.piece_on(m.get_dest()).is_some()
+                {
+                    reversible_moves = 0;
+                    legal_moves_per_turn.clear();
+                } else {
+                    reversible_moves += 1;
                 }
-                _ => {}
+                board = board.make_move_new(m);
+
+                if board.castle_rights(Color::White) != white_castle_rights
+                    || board.castle_rights(Color::Black) != black_castle_rights
+                {
+                    reversible_moves = 0;
+                    legal_moves_per_turn.clear();
+                }
+                legal_moves_per_turn.push((board.get_hash(), MoveGen::new_legal(&board).collect()));
             }
         }
 
@@ -254,13 +252,13 @@ impl Game {
             }
         }
 
-        return false;
+        false
     }
 
     /// Declare a draw by 3-fold repitition or 50-move rule.
     ///
     /// ```
-    /// use chess::{Game, Square, ChessMove};
+    /// use minorhacks_chess::{Game, Square, ChessMove};
     ///
     /// let b1c3 = ChessMove::new(Square::B1, Square::C3, None);
     /// let c3b1 = ChessMove::new(Square::C3, Square::B1, None);
@@ -297,7 +295,7 @@ impl Game {
     /// Make a chess move on the board
     ///
     /// ```
-    /// use chess::{Game, MoveGen};
+    /// use minorhacks_chess::{Game, MoveGen};
     ///
     /// let mut game = Game::new();
     ///
@@ -320,7 +318,7 @@ impl Game {
     /// Who's turn is it to move?
     ///
     /// ```
-    /// use chess::{Game, Color};
+    /// use minorhacks_chess::{Game, Color};
     ///
     /// let game = Game::new();
     /// assert_eq!(game.side_to_move(), Color::White);
@@ -329,10 +327,7 @@ impl Game {
         let move_count = self
             .moves
             .iter()
-            .filter(|m| match *m {
-                Action::MakeMove(_) => true,
-                _ => false,
-            })
+            .filter(|m| matches!(*m, Action::MakeMove(_)))
             .count()
             + if self.start_pos.side_to_move() == Color::White {
                 0
@@ -351,7 +346,7 @@ impl Game {
     /// accepted before my opponent moves.
     ///
     /// ```
-    /// use chess::{Game, Color};
+    /// use minorhacks_chess::{Game, Color};
     ///
     /// let mut game = Game::new();
     /// game.offer_draw(Color::White);
@@ -361,13 +356,13 @@ impl Game {
             return false;
         }
         self.moves.push(Action::OfferDraw(color));
-        return true;
+        true
     }
 
     /// Accept a draw offer from my opponent.
     ///
     /// ```
-    /// use chess::{Game, MoveGen, Color};
+    /// use minorhacks_chess::{Game, MoveGen, Color};
     ///
     /// let mut game = Game::new();
     /// game.offer_draw(Color::Black);
@@ -383,20 +378,19 @@ impl Game {
         if self.result().is_some() {
             return false;
         }
-        if self.moves.len() > 0 {
-            if self.moves[self.moves.len() - 1] == Action::OfferDraw(Color::White)
-                || self.moves[self.moves.len() - 1] == Action::OfferDraw(Color::Black)
-            {
-                self.moves.push(Action::AcceptDraw);
-                return true;
-            }
+        if !self.moves.is_empty()
+            && (self.moves[self.moves.len() - 1] == Action::OfferDraw(Color::White)
+                || self.moves[self.moves.len() - 1] == Action::OfferDraw(Color::Black))
+        {
+            self.moves.push(Action::AcceptDraw);
+            return true;
         }
 
-        if self.moves.len() > 1 {
-            if self.moves[self.moves.len() - 2] == Action::OfferDraw(!self.side_to_move()) {
-                self.moves.push(Action::AcceptDraw);
-                return true;
-            }
+        if self.moves.len() > 1
+            && self.moves[self.moves.len() - 2] == Action::OfferDraw(!self.side_to_move())
+        {
+            self.moves.push(Action::AcceptDraw);
+            return true;
         }
 
         false
@@ -405,7 +399,7 @@ impl Game {
     /// `color` resigns the game
     ///
     /// ```
-    /// use chess::{Game, Color};
+    /// use minorhacks_chess::{Game, Color};
     ///
     /// let mut game = Game::new();
     /// game.resign(Color::White);
@@ -415,7 +409,7 @@ impl Game {
             return false;
         }
         self.moves.push(Action::Resign(color));
-        return true;
+        true
     }
 }
 
@@ -431,7 +425,7 @@ impl FromStr for Game {
 pub fn fake_pgn_parser(moves: &str) -> Game {
     moves
         .split_whitespace()
-        .filter(|s| !s.ends_with("."))
+        .filter(|s| !s.ends_with('.'))
         .fold(Game::new(), |mut g, m| {
             g.make_move(ChessMove::from_san(&g.current_position(), m).expect("Valid SAN Move"));
             g

@@ -15,6 +15,7 @@ mod piece;
 mod rank;
 mod square;
 
+#[allow(unused_imports)]
 use crate::gen_tables::generate_all_tables;
 // Generate everything.
 fn main() {

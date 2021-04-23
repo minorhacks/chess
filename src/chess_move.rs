@@ -11,7 +11,7 @@ use std::fmt;
 use std::str::FromStr;
 
 /// Represent a ChessMove in memory
-#[derive(Clone, Copy, Eq, PartialOrd, PartialEq, Default, Debug, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Default, Debug, Hash)]
 pub struct ChessMove {
     source: Square,
     dest: Square,
@@ -24,9 +24,9 @@ impl ChessMove {
     #[inline]
     pub fn new(source: Square, dest: Square, promotion: Option<Piece>) -> ChessMove {
         ChessMove {
-            source: source,
-            dest: dest,
-            promotion: promotion,
+            source,
+            dest,
+            promotion,
         }
     }
 
@@ -50,7 +50,7 @@ impl ChessMove {
     /// Convert a SAN (Standard Algebraic Notation) move into a `ChessMove`
     ///
     /// ```
-    /// use chess::{Board, ChessMove, Square};
+    /// use minorhacks_chess::{Board, ChessMove, Square};
     ///
     /// let board = Board::default();
     /// assert_eq!(
@@ -131,7 +131,7 @@ impl ChessMove {
         let mut cur_index: usize = 0;
         let moving_piece = match move_text
             .get(cur_index..(cur_index + 1))
-            .ok_or(error.clone())?
+            .ok_or_else(|| error.clone())?
         {
             "N" => {
                 cur_index += 1;
@@ -158,7 +158,7 @@ impl ChessMove {
 
         let mut source_file = match move_text
             .get(cur_index..(cur_index + 1))
-            .ok_or(error.clone())?
+            .ok_or_else(|| error.clone())?
         {
             "a" => {
                 cur_index += 1;
@@ -197,7 +197,7 @@ impl ChessMove {
 
         let mut source_rank = match move_text
             .get(cur_index..(cur_index + 1))
-            .ok_or(error.clone())?
+            .ok_or_else(|| error.clone())?
         {
             "1" => {
                 cur_index += 1;
@@ -234,14 +234,9 @@ impl ChessMove {
             _ => None,
         };
 
-        let takes = if let Some(s) = move_text.get(cur_index..(cur_index + 1)) {
-            match s {
-                "x" => {
-                    cur_index += 1;
-                    true
-                }
-                _ => false,
-            }
+        let takes = if let Some("x") = move_text.get(cur_index..(cur_index + 1)) {
+            cur_index += 1;
+            true
         } else {
             false
         };
@@ -252,8 +247,8 @@ impl ChessMove {
                 q
             } else {
                 let sq = Square::make_square(
-                    source_rank.ok_or(error.clone())?,
-                    source_file.ok_or(error.clone())?,
+                    source_rank.ok_or_else(|| error.clone())?,
+                    source_file.ok_or_else(|| error.clone())?,
                 );
                 source_rank = None;
                 source_file = None;
@@ -261,8 +256,8 @@ impl ChessMove {
             }
         } else {
             let sq = Square::make_square(
-                source_rank.ok_or(error.clone())?,
-                source_file.ok_or(error.clone())?,
+                source_rank.ok_or_else(|| error.clone())?,
+                source_file.ok_or_else(|| error.clone())?,
             );
             source_rank = None;
             source_file = None;
@@ -353,22 +348,18 @@ impl ChessMove {
             }
 
             // takes is complicated, because of e.p.
-            if !takes {
-                if board.piece_on(m.get_dest()).is_some() {
-                    continue;
-                }
+            if !takes && board.piece_on(m.get_dest()).is_some() {
+                continue;
             }
 
-            if !ep && takes {
-                if board.piece_on(m.get_dest()).is_none() {
-                    continue;
-                }
+            if !ep && takes && board.piece_on(m.get_dest()).is_none() {
+                continue;
             }
 
             found_move = Some(m);
         }
 
-        found_move.ok_or(error.clone())
+        found_move.ok_or(error)
     }
 }
 
@@ -378,6 +369,12 @@ impl fmt::Display for ChessMove {
             None => write!(f, "{}{}", self.source, self.dest),
             Some(x) => write!(f, "{}{}{}", self.source, self.dest, x),
         }
+    }
+}
+
+impl PartialOrd for ChessMove {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -403,7 +400,7 @@ impl Ord for ChessMove {
 
 /// Convert a UCI `String` to a move. If invalid, return `None`
 /// ```
-/// use chess::{ChessMove, Square, Piece};
+/// use minorhacks_chess::{ChessMove, Square, Piece};
 /// use std::str::FromStr;
 ///
 /// let mv = ChessMove::new(Square::E7, Square::E8, Some(Piece::Queen));

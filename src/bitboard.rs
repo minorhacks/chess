@@ -9,7 +9,7 @@ use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, M
 /// using the implemented operators to work with this object.
 ///
 /// ```
-/// use chess::{BitBoard, Square};
+/// use minorhacks_chess::{BitBoard, Square};
 ///
 /// let bb = BitBoard(7); // lower-left 3 squares
 ///
@@ -29,7 +29,7 @@ pub struct BitBoard(pub u64);
 /// An empty bitboard.  It is sometimes useful to use !EMPTY to get the universe of squares.
 ///
 /// ```
-///     use chess::EMPTY;
+///     use minorhacks_chess::EMPTY;
 ///
 ///     assert_eq!(EMPTY.count(), 0);
 ///
@@ -262,7 +262,7 @@ impl fmt::Display for BitBoard {
                 s.push_str(". ");
             }
             if x % 8 == 7 {
-                s.push_str("\n");
+                s.push('\n');
             }
         }
         write!(f, "{}", s)
@@ -291,7 +291,7 @@ impl BitBoard {
     /// Convert an `Option<Square>` to an `Option<BitBoard>`
     #[inline]
     pub fn from_maybe_square(sq: Option<Square>) -> Option<BitBoard> {
-        sq.map(|s| BitBoard::from_square(s))
+        sq.map(BitBoard::from_square)
     }
 
     /// Convert a `BitBoard` to a `Square`.  This grabs the least-significant `Square`

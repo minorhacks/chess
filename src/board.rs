@@ -51,6 +51,7 @@ impl Default for Board {
     }
 }
 
+#[allow(clippy::derive_hash_xor_eq)]
 impl Hash for Board {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.hash.hash(state);
@@ -77,9 +78,9 @@ impl Board {
     /// Construct a board from a FEN string.
     ///
     /// ```
-    /// use chess::Board;
+    /// use minorhacks_chess::Board;
     /// use std::str::FromStr;
-    /// # use chess::Error;
+    /// # use minorhacks_chess::Error;
     ///
     /// # fn main() -> Result<(), Error> {
     ///
@@ -117,7 +118,7 @@ impl Board {
     /// Is this game Ongoing, is it Stalemate, or is it Checkmate?
     ///
     /// ```
-    /// use chess::{Board, BoardStatus, Square, ChessMove};
+    /// use minorhacks_chess::{Board, BoardStatus, Square, ChessMove};
     ///
     /// let mut board = Board::default();
     ///
@@ -171,7 +172,7 @@ impl Board {
     /// Grab the "combined" `BitBoard`.  This is a `BitBoard` with every piece.
     ///
     /// ```
-    /// use chess::{Board, BitBoard, Rank, get_rank};
+    /// use minorhacks_chess::{Board, BitBoard, Rank, get_rank};
     ///
     /// let board = Board::default();
     ///
@@ -191,7 +192,7 @@ impl Board {
     /// color.
     ///
     /// ```
-    /// use chess::{Board, BitBoard, Rank, get_rank, Color};
+    /// use minorhacks_chess::{Board, BitBoard, Rank, get_rank, Color};
     ///
     /// let board = Board::default();
     ///
@@ -212,7 +213,7 @@ impl Board {
     /// Give me the `Square` the `color` king is on.
     ///
     /// ```
-    /// use chess::{Board, Square, Color};
+    /// use minorhacks_chess::{Board, Square, Color};
     ///
     /// let board = Board::default();
     ///
@@ -227,7 +228,7 @@ impl Board {
     /// Grab the "pieces" `BitBoard`.  This is a `BitBoard` with every piece of a particular type.
     ///
     /// ```
-    /// use chess::{Board, BitBoard, Piece, Square};
+    /// use minorhacks_chess::{Board, BitBoard, Piece, Square};
     ///
     /// // The rooks should be in each corner of the board
     /// let rooks = BitBoard::from_square(Square::A1) |
@@ -247,7 +248,7 @@ impl Board {
     /// Grab the `CastleRights` for a particular side.
     ///
     /// ```
-    /// use chess::{Board, Square, CastleRights, Color, ChessMove};
+    /// use minorhacks_chess::{Board, Square, CastleRights, Color, ChessMove};
     ///
     /// let move1 = ChessMove::new(Square::A2,
     ///                            Square::A4,
@@ -299,7 +300,7 @@ impl Board {
     /// Remove castle rights for a particular side.
     ///
     /// ```
-    /// use chess::{Board, CastleRights, Color};
+    /// use minorhacks_chess::{Board, CastleRights, Color};
     ///
     /// let mut board = Board::default();
     /// assert_eq!(board.castle_rights(Color::White), CastleRights::Both);
@@ -322,7 +323,7 @@ impl Board {
     /// Who's turn is it?
     ///
     /// ```
-    /// use chess::{Board, Color};
+    /// use minorhacks_chess::{Board, Color};
     ///
     /// let mut board = Board::default();
     /// assert_eq!(board.side_to_move(), Color::White);
@@ -335,7 +336,7 @@ impl Board {
     /// Grab my `CastleRights`.
     ///
     /// ```
-    /// use chess::{Board, Color, CastleRights};
+    /// use minorhacks_chess::{Board, Color, CastleRights};
     ///
     /// let mut board = Board::default();
     /// board.remove_castle_rights(Color::White, CastleRights::KingSide);
@@ -363,7 +364,7 @@ impl Board {
     /// Remove some of my `CastleRights`.
     ///
     /// ```
-    /// use chess::{Board, CastleRights};
+    /// use minorhacks_chess::{Board, CastleRights};
     ///
     /// let mut board = Board::default();
     /// assert_eq!(board.my_castle_rights(), CastleRights::Both);
@@ -385,7 +386,7 @@ impl Board {
     /// My opponents `CastleRights`.
     ///
     /// ```
-    /// use chess::{Board, Color, CastleRights};
+    /// use minorhacks_chess::{Board, Color, CastleRights};
     ///
     /// let mut board = Board::default();
     /// board.remove_castle_rights(Color::White, CastleRights::KingSide);
@@ -413,7 +414,7 @@ impl Board {
     /// Remove some of my opponents `CastleRights`.
     ///
     /// ```
-    /// use chess::{Board, CastleRights};
+    /// use minorhacks_chess::{Board, CastleRights};
     ///
     /// let mut board = Board::default();
     /// assert_eq!(board.their_castle_rights(), CastleRights::Both);
@@ -445,7 +446,7 @@ impl Board {
     /// For a chess UI: set a piece on a particular square.
     ///
     /// ```
-    /// use chess::{Board, Piece, Color, Square};
+    /// use minorhacks_chess::{Board, Piece, Color, Square};
     ///
     /// let board = Board::default();
     ///
@@ -496,7 +497,7 @@ impl Board {
     /// For a chess UI: clear a particular square.
     ///
     /// ```
-    /// use chess::{Board, Square, Piece};
+    /// use minorhacks_chess::{Board, Square, Piece};
     ///
     /// let board = Board::default();
     ///
@@ -547,7 +548,7 @@ impl Board {
     /// always give the same result back.
     ///
     /// ```
-    /// use chess::{Board, Color};
+    /// use minorhacks_chess::{Board, Color};
     ///
     /// let board = Board::default();
     ///
@@ -575,7 +576,7 @@ impl Board {
     /// This is for sanity checking.
     ///
     /// ```
-    /// use chess::{Board, Color, Piece, Square};
+    /// use minorhacks_chess::{Board, Color, Piece, Square};
     ///
     /// let board = Board::default();
     ///
@@ -589,10 +590,8 @@ impl Board {
         // make sure there is no square with multiple pieces on it
         for x in ALL_PIECES.iter() {
             for y in ALL_PIECES.iter() {
-                if *x != *y {
-                    if self.pieces(*x) & self.pieces(*y) != EMPTY {
-                        return false;
-                    }
+                if *x != *y && self.pieces(*x) & self.pieces(*y) != EMPTY {
+                    return false;
                 }
             }
         }
@@ -661,12 +660,11 @@ impl Board {
             }
             // if we have castle rights, make sure we have a king on the (E, {1,8}) square,
             // depending on the color
-            if castle_rights != CastleRights::NoRights {
-                if self.pieces(Piece::King) & self.color_combined(*color)
+            if castle_rights != CastleRights::NoRights
+                && self.pieces(Piece::King) & self.color_combined(*color)
                     != get_file(File::E) & get_rank(color.to_my_backrank())
-                {
-                    return false;
-                }
+            {
+                return false;
             }
         }
 
@@ -676,7 +674,7 @@ impl Board {
         }
 
         // it checks out
-        return true;
+        true
     }
 
     /// Get a hash of the board.
@@ -714,7 +712,7 @@ impl Board {
     /// What piece is on a particular `Square`?  Is there even one?
     ///
     /// ```
-    /// use chess::{Board, Piece, Square};
+    /// use minorhacks_chess::{Board, Piece, Square};
     ///
     /// let board = Board::default();
     ///
@@ -745,14 +743,12 @@ impl Board {
                 } else {
                     Some(Piece::Bishop)
                 }
+            } else if self.pieces(Piece::Rook) & opp != EMPTY {
+                Some(Piece::Rook)
+            } else if self.pieces(Piece::Queen) & opp != EMPTY {
+                Some(Piece::Queen)
             } else {
-                if self.pieces(Piece::Rook) & opp != EMPTY {
-                    Some(Piece::Rook)
-                } else if self.pieces(Piece::Queen) & opp != EMPTY {
-                    Some(Piece::Queen)
-                } else {
-                    Some(Piece::King)
-                }
+                Some(Piece::King)
             }
         }
     }
@@ -777,7 +773,7 @@ impl Board {
     /// Give me the en_passant square, if it exists.
     ///
     /// ```
-    /// use chess::{Board, ChessMove, Square};
+    /// use minorhacks_chess::{Board, ChessMove, Square};
     ///
     /// let move1 = ChessMove::new(Square::D2,
     ///                            Square::D4,
@@ -825,7 +821,7 @@ impl Board {
     /// input.
     ///
     /// ```
-    /// use chess::{Board, ChessMove, Square, MoveGen};
+    /// use minorhacks_chess::{Board, ChessMove, Square, MoveGen};
     ///
     /// let move1 = ChessMove::new(Square::E2,
     ///                            Square::E4,
@@ -842,7 +838,7 @@ impl Board {
     /// ```
     #[inline]
     pub fn legal(&self, m: ChessMove) -> bool {
-        MoveGen::new_legal(&self).find(|x| *x == m).is_some()
+        MoveGen::new_legal(&self).any(|x| x == m)
     }
 
     /// Make a chess move onto a new board.
@@ -850,7 +846,7 @@ impl Board {
     /// panic!() if king is captured.
     ///
     /// ```
-    /// use chess::{Board, ChessMove, Square, Color};
+    /// use minorhacks_chess::{Board, ChessMove, Square, Color};
     ///
     /// let m = ChessMove::new(Square::D2,
     ///                        Square::D4,
@@ -873,7 +869,7 @@ impl Board {
     /// panic!() if king is captured.
     ///
     /// ```
-    /// use chess::{Board, ChessMove, Square, Color};
+    /// use minorhacks_chess::{Board, ChessMove, Square, Color};
     ///
     /// let m = ChessMove::new(Square::D2,
     ///                        Square::D4,
@@ -1105,7 +1101,7 @@ impl FromStr for Board {
     type Err = Error;
 
     fn from_str(value: &str) -> Result<Self, Self::Err> {
-        Ok(BoardBuilder::from_str(value)?.try_into()?)
+        BoardBuilder::from_str(value)?.try_into()
     }
 }
 
