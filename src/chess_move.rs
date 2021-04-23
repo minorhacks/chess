@@ -264,6 +264,11 @@ impl ChessMove {
             sq
         };
 
+        // Ignore an '=' sign, for PGN compatibility
+        if let Some("=") = move_text.get(cur_index..(cur_index + 1)) {
+            cur_index += 1;
+        }
+
         let promotion = if let Some(s) = move_text.get(cur_index..(cur_index + 1)) {
             match s {
                 "N" => {
