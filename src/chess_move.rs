@@ -60,10 +60,14 @@ impl ChessMove {
     /// ```
     pub fn from_san(board: &Board, move_text: &str) -> Result<ChessMove, Error> {
         // Castles first...
-        if move_text == "O-O" || move_text == "O-O-O" {
+        if move_text.starts_with("O-O") {
             let rank = board.side_to_move().to_my_backrank();
             let source_file = File::E;
-            let dest_file = if move_text == "O-O" { File::G } else { File::C };
+            let dest_file = if move_text.starts_with("O-O-O") {
+                File::C
+            } else {
+                File::G
+            };
 
             let m = ChessMove::new(
                 Square::make_square(rank, source_file),
